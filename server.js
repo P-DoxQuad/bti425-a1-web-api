@@ -10,7 +10,6 @@ const path = require("path");
 const bodyParser = require('body-parser');
 const app = express();
 const HTTP_PORT = process.env.PORT || 8080;
-// Or use some other port number that you like better
 
 // Add support for incoming JSON entities
 app.use(bodyParser.json());
@@ -62,33 +61,30 @@ app.get("/api", (req, res) => {
 // Request handlers for data entities (listeners)
 
 // Get all
-app.get("/api/cars", (req, res) => {
+app.get("/api/vehicles", (req, res) => {
   // Call the manager method
-  res.json(mgr.carGetAll());
+  res.json(mgr.vehicleGetAll());
 });
 
 // Get one
-app.get("/api/cars/:id", (req, res) => {
+app.get("/api/vehicles/:id", (req, res) => {
   // Call the manager method
-  let carID = mgr.carGetById(req.params.id);
+  let vehicleID = mgr.vehicleGetById(req.params.id);
   // Return the appropriate result
   // Longer if-else formgr...
-  if (carID) {
-    res.json(carID);
+  if (vehicleID) {
+    res.json(vehicleID);
   }
   else {
     res.status(404).json({ "message": "Resource not found" });
   }
-  
-  // Terse formgr...
-  //carID ? res.json(carID) : res.status(404).json({ "message": "Resource not found" });
 });
 
 // Add new
-app.post("/api/cars", (req, res) => {
+app.post("/api/vehicles", (req, res) => {
   // Call the manager method
   // MUST return HTTP 201
-  res.status(201).json(mgr.carAdd(req.body));
+  res.status(201).json(mgr.vehicleAdd(req.body));
 });
 
 // Edit existing
@@ -100,16 +96,21 @@ app.put("/api/cars/:id", (req, res) => {
   }
   else {
     // Call the manager method
-    let editCar = mgr.carEdit(req.body);
+    let editVehicle = mgr.vehicleEdit(req.body);
     // Return the appropriate result
-    editCar ? res.json(editCar) : res.status(404).json({ "message": "Resource not found" });
+    if (editVehicle) {
+      res.json(editVehicle);
+
+    } else {
+      res.status(404).json({ "message": "Resource not found" });
+    }
   }
 });
 
 // Delete item
 app.delete("/api/cars/:id", (req, res) => {
   // Call the manager method
-  mgr.carDelete(req.params.id)
+  mgr.vehicleDelete(req.params.id)
   // MUST return HTTP 204
   res.status(204).end();
 });
@@ -128,4 +129,5 @@ app.use((req, res) => {
 // ################################################################################
 // Tell the app to start listening for requests
 
-app.listen(HTTP_PORT, () => { console.log("Ready to handle requests on port " + HTTP_PORT) });
+app.listen(HTTP_PORT, function() { 
+  console.log("Hello, World! Express is ready to handle HTTP requests on port " + HTTP_PORT) });
