@@ -1,173 +1,139 @@
 /******************************************************************************
- * This module is strictly for validating and authenticating user credentals. *
- * It uses a completely seperate DB platform and connection. Mongoose is used *
- * as the middleware interface between NodeJS and MongoDB.                    *
+ * This module interfaces with MongoDB and performs the respected CRUD        *
+ * operations: CREATE, READ, UPDATE, DELETE. Mongoose is used as the          *
+ * middleware interface between NodeJS and MongoDB.                           *
  ******************************************************************************/ 
 
-const bcrypt = require("bcryptjs");
- const mongoose = require("mongoose");                                                               // Linking Mongoose module.
-var Schema = mongoose.Schema;                                                                       // Assigning Mongoose Schema to variable.
+const mongoose = require("mongoose");                                                               // Linking Mongoose module.
+const vehicleSchema = require("./vehicle-schema.js");         // Load Schema                                                              // Assigning Mongoose Schema to variable.
 
-// Schema of User Account
-var userSchema = new Schema({
-    
-    "userName": {
-        "type": String,
-        "unique": true
-    },
-    "password": String,
-    "email": String,
-    "loginHistory": [{
-        "dateTime": Date,
-        "userAgent": String
-    }]
-});
+//var vehicleManager = mongoose.model("db-a1", vehicleSchema);
 
-var userCred = mongoose.model("bti325-mdzura-a6", userSchema);
 
-let User;
 
+
+/******************************************************************************
+ * Initializes Connection to Database                                         *
+ ******************************************************************************/
+let Vehicles;                                                                           // Collection Properties
 module.exports.initialize = function() {
     return new Promise(function(resolve, reject) {
-        let db = mongoose.createConnection("mongodb://dbuser:1234@senecaweb-shard-00-00-nhbot.mongodb.net:27017,senecaweb-shard-00-01-nhbot.mongodb.net:27017,senecaweb-shard-00-02-nhbot.mongodb.net:27017/test?ssl=true&replicaSet=SenecaWeb-shard-0&authSource=admin&retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true });
+        let db = mongoose.createConnection("mongodb://dbuser:1234@cluster1-shard-00-00-hc4tf.gcp.mongodb.net:27017,cluster1-shard-00-01-hc4tf.gcp.mongodb.net:27017,cluster1-shard-00-02-hc4tf.gcp.mongodb.net:27017/test?ssl=true&replicaSet=cluster1-shard-0&authSource=admin&retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true });
 
         db.on('error', (err) => {
-            reject(err);                                                                            // If connection error, Reject the promise with the provided error.
+            reject(console.log(err.message));                                                                            // If connection error, Reject the promise with the provided error.
         });
         db.once('open', () => {
-            User = db.model("users", userSchema);                                                   // Create a user model from schema above.
+            Vehicles = db.model("vehicles", vehicleSchema);                                                   // Create a user model from schema above.
             resolve();
         });
     });
 };
-/******************************************************************************
- * Registers a New User in the Database for Authentication                    *
- ******************************************************************************/
-module.exports.registerUser = function(userData) {
-    console.log("Registering New User " + userData.userName + " " + userData.password + " " + userData.password2);
-    return new Promise(function(resolve, reject) {
-        if(userData.userName.length == 0 || userData.password.length == 0 || userData.password2.length == 0 ) {     // If registration fields are blank, Reject.
-            console.log("Error: Cannot be blank!");
-            reject("Cannot be blank!");                                                         
-        } else if(userData.password !== userData.password2) {                                                       // If the passwords don't match, Reject.
-            console.log("Error: Password doesn't match!");
-            reject("Password doesn't match!");
-        } else {
-            console.log("Username: " + userData.userName + "\nPassword: " + userData.password);
-            let newUser = new User(userData);                                                                       // Create a New User object with form data.
-            bcrypt.genSalt(10, function (err, salt) {                                                               // Generate a "salt" using 10 rounds.
-                bcrypt.hash(userData.password, salt, function (err, hash) {                                         // Encrypt the password.
-                    if (err){
-                        console.log("There was an error encrypting the password");
-                        reject("There was an error encrypting the password");
-                    }
-                    newUser.password = hash;
-                    newUser.save(function(err) {                                                                    // Save New User to MongoDB
-                        if(err) {
-                            if(err.code == 11000) {                                                                 // If Username key value already exists, Reject.
-                                console.log("Error: Username taken!");
-                                reject("Username taken!");
-                            } else {
-                                reject("There was an error saving the new user");
-                            }
-                        } else {
-                            console.log("The new user was saved to the collection");
-                            resolve("The new user was saved to the collection");                                    // Resolve if New User sucessfully saved to collection.
-                        }
-                    });
-                });
-            });
-        }
-    });
+/*******************************************************************************/
 
-    /* console.log("Registering New User " + userData.userName + " " + userData.password + " " + userData.password2);
+/******************************************************************************
+ * Retreives list of all vehicles from the Database                           *
+ ******************************************************************************/
+module.exports.vehicleGetAll = function() {
+    console.log("Getting All Vehicles...");
     return new Promise(function(resolve, reject) {
-        if(userData.userName.length == 0 || userData.password.length == 0 || userData.password2.length == 0 ) {     // If registration fields are blank, Reject.
-            console.log("Error: Cannot be blank!");
-            reject("Cannot be blank!");                                                         
-        } else if(userData.password !== userData.password2) {                                                       // If the passwords don't match, Reject.
-            console.log("Error: Password doesn't match!");
-            reject("Password doesn't match!");
-        } else {
-            console.log("Username: " + userData.userName + "\nPassword: " + userData.password);
-            let newUser = new User(userData);                                                                       // Create a New User object with form data.
-            newUser.save(function(err) {                                                                            // Save New User to MongoDB
-                if(err) {
-                    if(err.code == 11000) {                                                                         // If Username key value already exists, Reject.
-                        console.log("Error: Username taken!");
-                        reject("Username taken!");
-                    } else {
-                        reject("There was an error saving the new user");
-                    }
-                } else {
-                    console.log("The new user was saved to the collection");
-                    resolve("The new user was saved to the collection");                                             // Resolve if New User sucessfully saved to collection.
-                }
-            });
-        }
-    }); */
+        Vehicles.find()
+          .limit(20)
+          .sort({ make: 'asc', model: 'asc', colour: 'asc', year: 'asc' })
+          .exec((error, items) => {
+            if (error) {
+              // Query error
+              return reject(console.log(error.message));
+            }
+            // Found, a collection will be returned
+            return resolve(items);
+          });
+    });
 };
 /*******************************************************************************/
 
-/*******************************************************************************
- * Validates Users Credentials against database.                               *
- * *****************************************************************************/
-module.exports.checkUser = function (userData) {
+/******************************************************************************
+ * Retreives individual vehicle by ID from the Database                       *
+ ******************************************************************************/
+module.exports.vehicleGetById = function (itemId) {
+    console.log("Getting Vehicle By ID...");
     return new Promise(function (resolve, reject) {
-        console.log("Searching.... " + userData.userName);
-        User.findOne({ userName: userData.userName }).exec().then(function(foundUser) {                                     // Query Database for User.                                                                                                
-                console.log("Found: " + foundUser.userName + " " + foundUser.password + " " + foundUser.loginHistory);
-                bcrypt.compare(userData.password, foundUser.password).then(function() {
-                    if (!foundUser) {                                                                                       // If User is not found in database, Reject.
-                        console.log(userData.firstName + ": Not Found");
-                        reject(userData.firstName + ": Not Found");
-                    } else {
-                        foundUser.loginHistory.push({ dateTime: (new Date()).toString(), userAgent: userData.userAgent });   // Push current date/time to loginHistory local object.
-                        User.updateOne(                                                                                      // Update User on database.
-                            { userName: userData.userName },
-                            { $push: { loginHistory: { dateTime: new Date().toString(), userAgent: userData.userAgent } } }, // Push current date/time to loginHistory on database.
-                            { multi: false }
-                        ).exec().then(function () {
-                            resolve(foundUser);
-                        }).catch(function (err) {
-                            console.log("There was an error verifying the user: " + err);
-                            reject("There was an error verifying the user: " + err);
-                        });
-                    }
-                })
-            }).catch(function (err) {
-                console.log("There was an error finding user: " + err);
-                reject("There was an error finding user: " + err);
-            });
+        // Find one specific document
+        Vehicles.findById(itemId, function(error, item) {
+            if (error) {
+                // Find/match is not found
+                return reject(error.message);
+            }
+            // Check for an item
+            if (item) {
+                // Found, one object will be returned
+                return resolve(item);
+            } else {
+                return reject('Not found');
+            }
+        });
     });
+};
+/*******************************************************************************/
 
-    /* return new Promise(function (resolve, reject) {
-        console.log("Searching.... " + userData.userName);
-        User.findOne({ userName: userData.userName }).exec().then(function(foundUser) {                                 // Query Database for User.                                                                                                
-                console.log("Found: " + foundUser.userName + " " + foundUser.password + " " + foundUser.loginHistory);
-                if (!foundUser) {                                                                                       // If User is not found in database, Reject.
-                    console.log(userData.firstName + ": Not Found");
-                    reject(userData.firstName + ": Not Found");
-                } else if (foundUser.password != userData.password) {                                                   // Reject if password doesn't match database.
-                    console.log("Incorrect Password for user: " + userData.userName);
-                    reject("Incorrect Password for user: " + userData.userName);
-                } else {
-                    foundUser.loginHistory.push({dateTime: (new Date()).toString(), userAgent: userData.userAgent});    // Push current date/time to loginHistory local object.
-                    User.updateOne(                                                                                     // Update User on database.
-                        { userName: userData.userName },
-                        { $push: { loginHistory: { dateTime: new Date().toString(), userAgent: userData.userAgent}}},   // Push current date/time to loginHistory on database.
-                        { multi: false }
-                    ).exec().then(function () {
-                        resolve(foundUser);
-                    }).catch(function (err) {
-                        console.log("There was an error verifying the user: " + err);
-                        reject("There was an error verifying the user: " + err);
-                    });
-                }
-            }).catch(function (err) {
-                console.log("There was an error finding user: " + err);
-                reject("There was an error finding user: " + err);
-            });
-    }); */
+/******************************************************************************
+ * Add Vehicle to the Database                                                *
+ ******************************************************************************/
+module.exports.vehicleAdd = function (newItem) {
+    console.log("Adding Vehicle to Collection...");
+    return new Promise(function (resolve, reject) {
+        // Find one specific document
+        Vehicles.create(newItem, function (error, item) {
+            if (error) {
+              // Cannot add item
+              return reject(console.log(error.message));
+            }
+            //Added object will be returned
+            return resolve(item);
+        });
+    });
+};
+/*******************************************************************************/
+
+/******************************************************************************
+ * Edit existing vehicle from the Database                                    *
+ ******************************************************************************/
+module.exports.vehicleEdit = function (newItem) {
+    console.log("Editing Vehicle in Collection...");
+    return new Promise(function (resolve, reject) {
+        // Find one specific document
+        Vehicles.findByIdAndUpdate(newItem._id, newItem, { new: true }, function (error, item) {
+            if (error) {
+              // Cannot edit item
+              return reject(console.log(error.message));
+            }
+            // Check for an item
+            if (item) {
+              // Edited object will be returned
+              return resolve(item);
+            } else {
+              return reject(console.log("Not Found!"));
+            }
+        });
+    });
+};
+/*******************************************************************************/
+
+/******************************************************************************
+ * Delete vehicle from the Database                                           *
+ ******************************************************************************/
+module.exports.vehicleDelete = function (itemId) {
+    console.log("Deleting Vehicle By ID...");
+    return new Promise(function (resolve, reject) {
+        // Find one specific document
+        Vehicles.findByIdAndRemove(itemId, function (error) {
+            if (error) {
+              // Cannot delete item
+              return reject(error.message);
+            }
+            // Return success, but don't leak info
+            return resolve();
+        });
+    });
 };
 /*******************************************************************************/
