@@ -18,14 +18,15 @@ const vehicleSchema = require("./vehicle-schema.js");         // Load Schema    
 let Vehicles;                                                                           // Collection Properties
 module.exports.initialize = function() {
     return new Promise(function(resolve, reject) {
-        let db = mongoose.createConnection("mongodb://dbuser:1234@cluster1-shard-00-00-hc4tf.gcp.mongodb.net:27017,cluster1-shard-00-01-hc4tf.gcp.mongodb.net:27017,cluster1-shard-00-02-hc4tf.gcp.mongodb.net:27017/test?ssl=true&replicaSet=cluster1-shard-0&authSource=admin&retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true });
+        let db = mongoose.createConnection("mongodb://dbuser:1234@cluster1-shard-00-00-hc4tf.gcp.mongodb.net:27017,cluster1-shard-00-01-hc4tf.gcp.mongodb.net:27017,cluster1-shard-00-02-hc4tf.gcp.mongodb.net:27017/db-a1?ssl=true&replicaSet=cluster1-shard-0&authSource=admin&retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true });
 
-        db.on('error', (err) => {
+        db.on('error', function (err) {
             reject(console.log(err.message));                                                                            // If connection error, Reject the promise with the provided error.
         });
-        db.once('open', () => {
-            Vehicles = db.model("vehicles", vehicleSchema);                                                   // Create a user model from schema above.
-            resolve();
+        db.once('open', function () {
+            Vehicles = db.model("db-a1", vehicleSchema, "vehicles");                                                   // Create a user model from schema above.
+            
+            resolve(console.log("Database Connected"));
         });
     });
 };
@@ -39,14 +40,16 @@ module.exports.vehicleGetAll = function() {
     return new Promise(function(resolve, reject) {
         Vehicles.find()
           .limit(20)
-          .sort({ make: 'asc', model: 'asc', colour: 'asc', year: 'asc' })
-          .exec((error, items) => {
+          .sort({ make: 'asc', model: 'asc', year: 'asc' })
+          .exec(function (error, items) {
             if (error) {
               // Query error
               return reject(console.log(error.message));
             }
-            // Found, a collection will be returned
-            return resolve(items);
+            // Found, a collection will be returned 
+            console.log(items);
+            return resolve(JSON.stringify(items));
+           
           });
     });
 };
@@ -55,19 +58,19 @@ module.exports.vehicleGetAll = function() {
 /******************************************************************************
  * Retreives individual vehicle by ID from the Database                       *
  ******************************************************************************/
-module.exports.vehicleGetById = function (itemId) {
-    console.log("Getting Vehicle By ID...");
+module.exports.vehicleGetByVin = function (vinNum) {
+    console.log("Getting Vehicle By VIN...");
     return new Promise(function (resolve, reject) {
         // Find one specific document
-        Vehicles.findById(itemId, function(error, item) {
+        Vehicles.findOne({"vin": vinNum}, function(error, data) {
             if (error) {
                 // Find/match is not found
                 return reject(error.message);
             }
             // Check for an item
-            if (item) {
+            if (data) {
                 // Found, one object will be returned
-                return resolve(item);
+                return resolve(data);
             } else {
                 return reject('Not found');
             }
