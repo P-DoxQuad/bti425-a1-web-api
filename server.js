@@ -57,7 +57,7 @@ app.get("/api", (req, res) => {
   const linkObject = { 
     "links": links, 
     "apiVersion": "1.0", 
-    "apiName": "Web API example version 6" 
+    "apiName": "Vehcle Manager API Version 1" 
   };
   res.json(linkObject);
 });
@@ -94,12 +94,17 @@ app.get("/api/vehicles/:vin", function (req, res) {
 // Add new
 app.post("/api/vehicles", function (req, res) {
   // Call the manager method
-  // MUST return HTTP 201
-  res.status(201).json(manager.vehicleAdd(req.body));
+  manager.vehicleAdd(req.body)
+         .then(function(data) {
+           res.json(data);
+         })
+         .catch(function(error) {
+            res.status(500).json({ "message": error });
+         })
 });
 
 // Edit existing
-app.put("/api/cars/:id", function (req, res) {
+app.put("/api/vehicles/:id", function (req, res) {
   // Make sure that the URL parameter matches the body value
   // This code is customized for the expected shape of the body object
   if (req.params.id != req.body.id) {
@@ -107,23 +112,26 @@ app.put("/api/cars/:id", function (req, res) {
   }
   else {
     // Call the manager method
-    let editVehicle = manager.vehicleEdit(req.body);
-    // Return the appropriate result
-    if (editVehicle) {
-      res.json(editVehicle);
-
-    } else {
-      res.status(404).json({ "message": "Resource not found" });
-    }
+    manager.vehicleEdit(req.body)
+    .then(function(data) {
+      res.json(data);
+    })
+    .catch(function(error) {
+       res.status(500).json({ "message": error });
+    })
   }
 });
 
 // Delete item
-app.delete("/api/cars/:id", function (req, res) {
+app.delete("/api/vehicles/:id", function (req, res) {
   // Call the manager method
-  manager.vehicleDelete(req.params.id)
-  // MUST return HTTP 204
-  res.status(204).end();
+  manager.vehicleDelete(req.body)
+         .then(function(data) {
+           res.json(data);
+         })
+         .catch(function(error) {
+            res.status(500).json({ "message": error });
+         })
 });
 
 
