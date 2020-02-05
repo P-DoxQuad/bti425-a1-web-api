@@ -1,4 +1,13 @@
-
+/*********************************************************************************
+ * BTI425 – Assignment 1 
+ * I declare that this assignment is my own work in accordance with Seneca Academic Policy. 
+ * No part of this assignment has been copied manually or electronically from any other source 
+ * (including 3rd-party web sites) or distributed to other students. 
+ * 
+ * Name: Michael Dzura Student ID: 033566100 Date: 11/21/2019 
+ * 
+ * Online (Heroku) URL: https://bti325-a6-mdzura.herokuapp.com/
+ * ********************************************************************************/
 
 
 // ################################################################################
@@ -22,15 +31,13 @@ app.use(cors());
 // Data model and persistent store setup
 
 const manager = require("./manager.js");
-const mgr = manager();
-
-
 
 // ################################################################################
 // Deliver the app's home page to browser clients
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/index.html"));
+  
 });
 
 
@@ -43,7 +50,7 @@ app.get("/api", (req, res) => {
   // YOU MUST EDIT THIS COLLECTION
   const links = [];
   // This app's resources...
-  links.push({ "rel": "collection", "href": "/api/cars", "methods": "GET,POST" });
+  links.push({ "rel": "collection", "href": "/api/vehicles", "methods": "GET,POST" });
   // Example resources...
   links.push({ "rel": "collection", "href": "/api/customers", "methods": "GET,POST" });
   links.push({ "rel": "collection", "href": "/api/employees", "methods": "GET,POST" });
@@ -61,34 +68,38 @@ app.get("/api", (req, res) => {
 // Request handlers for data entities (listeners)
 
 // Get all
-app.get("/api/vehicles", (req, res) => {
+app.get("/api/vehicles", function (req, res) {
   // Call the manager method
-  res.json(mgr.vehicleGetAll());
+  manager.vehicleGetAll()
+         .then(function (data) {
+           res.json(data);
+         })
+         .catch(function (error) {
+          res.status(500).json({ "message": error });
+         })
 });
 
 // Get one
-app.get("/api/vehicles/:id", (req, res) => {
+app.get("/api/vehicles/:vin", function (req, res) {
   // Call the manager method
-  let vehicleID = mgr.vehicleGetById(req.params.id);
-  // Return the appropriate result
-  // Longer if-else formgr...
-  if (vehicleID) {
-    res.json(vehicleID);
-  }
-  else {
+  manager.vehicleGetByVin(req.params.vin)
+  .then(function (data) {
+    res.json(data);
+  })
+  .catch(function() {
     res.status(404).json({ "message": "Resource not found" });
-  }
+  })
 });
 
 // Add new
-app.post("/api/vehicles", (req, res) => {
+app.post("/api/vehicles", function (req, res) {
   // Call the manager method
   // MUST return HTTP 201
-  res.status(201).json(mgr.vehicleAdd(req.body));
+  res.status(201).json(manager.vehicleAdd(req.body));
 });
 
 // Edit existing
-app.put("/api/cars/:id", (req, res) => {
+app.put("/api/cars/:id", function (req, res) {
   // Make sure that the URL parameter matches the body value
   // This code is customized for the expected shape of the body object
   if (req.params.id != req.body.id) {
@@ -96,7 +107,7 @@ app.put("/api/cars/:id", (req, res) => {
   }
   else {
     // Call the manager method
-    let editVehicle = mgr.vehicleEdit(req.body);
+    let editVehicle = manager.vehicleEdit(req.body);
     // Return the appropriate result
     if (editVehicle) {
       res.json(editVehicle);
@@ -108,9 +119,9 @@ app.put("/api/cars/:id", (req, res) => {
 });
 
 // Delete item
-app.delete("/api/cars/:id", (req, res) => {
+app.delete("/api/cars/:id", function (req, res) {
   // Call the manager method
-  mgr.vehicleDelete(req.params.id)
+  manager.vehicleDelete(req.params.id)
   // MUST return HTTP 204
   res.status(204).end();
 });
@@ -120,7 +131,7 @@ app.delete("/api/cars/:id", (req, res) => {
 // ################################################################################
 // Resource not found (this should be at the end)
 
-app.use((req, res) => {
+app.use(function (req, res) {
   res.status(404).send("Resource not found");
 });
 
@@ -130,4 +141,7 @@ app.use((req, res) => {
 // Tell the app to start listening for requests
 
 app.listen(HTTP_PORT, function() { 
-  console.log("Hello, World! Express is ready to handle HTTP requests on port " + HTTP_PORT) });
+  console.log("Hello, World! Express is ready to handle HTTP requests on port " + HTTP_PORT);
+  manager.initialize();
+});
+
