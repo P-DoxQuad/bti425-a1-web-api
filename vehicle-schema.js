@@ -6,7 +6,6 @@ var Schema = mongoose.Schema;
 // Entity schema
 
 var vehicleSchema = new Schema({
-  id: Number,
   make: String,
   model: String,
   colour: String,
