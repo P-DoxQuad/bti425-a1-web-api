@@ -104,10 +104,10 @@ app.post("/api/vehicles", function (req, res) {
 });
 
 // Edit existing
-app.put("/api/vehicles/:id", function (req, res) {
+app.put("/api/vehicles/:vin", function (req, res) {
   // Make sure that the URL parameter matches the body value
   // This code is customized for the expected shape of the body object
-  if (req.params.id != req.body.id) {
+  if (req.params.vin != req.body.vin) {
     res.status(404).json({ "message": "Resource not found" });
   }
   else {
