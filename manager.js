@@ -48,7 +48,7 @@ module.exports.vehicleGetAll = function() {
     console.log("Getting All Vehicles...");
     return new Promise(function(resolve, reject) {
         Vehicles.find()
-          .limit(20)
+          //.limit(20)
           .sort({ make: 'asc', model: 'asc', year: 'asc' })
           .exec(function (error, items) {
             if (error) {
