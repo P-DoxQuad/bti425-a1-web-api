@@ -57,7 +57,7 @@ module.exports.vehicleGetAll = function() {
             }
             // Found, a collection will be returned 
             console.log(items);
-            return resolve(JSON(items));
+            return resolve(JSON.toObject(items));
            
           });
     });
