@@ -51,13 +51,12 @@ app.get("/api", (req, res) => {
   const links = [];
   // This app's resources...
   links.push({ "rel": "collection", "href": "/api/vehicles", "methods": "GET,POST" });
-  // Example resources...
-  links.push({ "rel": "collection", "href": "/api/customers", "methods": "GET,POST" });
-  links.push({ "rel": "collection", "href": "/api/employees", "methods": "GET,POST" });
+  links.push({ "rel": "collection", "href": "/api/vehicles/:vin", "methods": "GET,PUT,DELETE" });
+  links.push({ "rel": "collection", "href": "/api/vehicles/:id", "methods": "GET,PUT,DELETE" });
   const linkObject = { 
     "links": links, 
     "apiVersion": "1.0", 
-    "apiName": "Vehcle Manager API Version 1" 
+    "apiName": "Vehicle Manager API Version 1" 
   };
   res.json(linkObject);
 });
