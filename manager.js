@@ -49,6 +49,7 @@ module.exports.vehicleGetAll = function() {
     return new Promise(function(resolve, reject) {
         Vehicles.find()
           //.limit(20)
+          .lean()
           .sort({id: 'asc', make: 'asc', model: 'asc', year: 'asc' })
           .exec(function (error, items) {
             if (error) {
