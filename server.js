@@ -79,9 +79,9 @@ app.get("/api/vehicles", function (req, res) {
 });
 
 // Get one by vin
-app.get("/api/vehicles/:vin", function (req, res) {
+app.get("/api/vehicles/vin/:id", function (req, res) {
   // Call the manager method
-  manager.vehicleGetByVin(req.params.vin)
+  manager.vehicleGetByVin(req.params.id)
   .then(function (data) {
     res.json(data);
   })
