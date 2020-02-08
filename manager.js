@@ -5,6 +5,15 @@
  ******************************************************************************/ 
 
 const mongoose = require("mongoose");                                                               // Linking Mongoose module.
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+
+
+
+
+
+
 const vehicleSchema = require("./vehicle-schema.js");         // Load Schema                                                              // Assigning Mongoose Schema to variable.
 
 //var vehicleManager = mongoose.model("db-a1", vehicleSchema);
@@ -56,7 +65,7 @@ module.exports.vehicleGetAll = function() {
 /*******************************************************************************/
 
 /******************************************************************************
- * Retreives individual vehicle by ID from the Database                       *
+ * Retreives individual vehicle by VIN from the Database                       *
  ******************************************************************************/
 module.exports.vehicleGetByVin = function (vinNum) {
     console.log("Getting Vehicle By VIN...");
@@ -79,6 +88,29 @@ module.exports.vehicleGetByVin = function (vinNum) {
 };
 /*******************************************************************************/
 
+/******************************************************************************
+ * Retreives individual vehicle by ID from the Database                       *
+ ******************************************************************************/
+module.exports.vehicleGetById = function (byId) {
+    console.log("Getting Vehicle By ID...");
+    return new Promise(function (resolve, reject) {
+        // Find one specific document
+        Vehicles.findOne({"id": byId}, function(error, data) {
+            if (error) {
+                // Find/match is not found
+                return reject(error.message);
+            }
+            // Check for an item
+            if (data) {
+                // Found, one object will be returned
+                return resolve(data);
+            } else {
+                return reject('Not found');
+            }
+        });
+    });
+};
+/*******************************************************************************/
 /******************************************************************************
  * Add Vehicle to the Database                                                *
  ******************************************************************************/

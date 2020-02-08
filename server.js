@@ -78,10 +78,22 @@ app.get("/api/vehicles", function (req, res) {
          })
 });
 
-// Get one
+// Get one by vin
 app.get("/api/vehicles/:vin", function (req, res) {
   // Call the manager method
   manager.vehicleGetByVin(req.params.vin)
+  .then(function (data) {
+    res.json(data);
+  })
+  .catch(function() {
+    res.status(404).json({ "message": "Resource not found" });
+  })
+});
+
+// Get one by id
+app.get("/api/vehicles/:id", function (req, res) {
+  // Call the manager method
+  manager.vehicleGetById(req.params.id)
   .then(function (data) {
     res.json(data);
   })
