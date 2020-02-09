@@ -103,7 +103,7 @@ app.get("/api/vehicles/:id", function (req, res) {
 });
 
 // Add new
-app.post("/api/vehicles", function (req, res) {
+app.post("/api/vehicle/add", function (req, res) {
   // Call the manager method
   manager.vehicleAdd(req.body)
          .then(function(data) {
@@ -115,10 +115,10 @@ app.post("/api/vehicles", function (req, res) {
 });
 
 // Edit existing
-app.put("/api/vehicles/:vin", function (req, res) {
+app.put("/api/vehicles/:id", function (req, res) {
   // Make sure that the URL parameter matches the body value
   // This code is customized for the expected shape of the body object
-  if (req.params.vin != req.body.vin) {
+  if (req.params.id != req.body.id) {
     res.status(404).json({ "message": "Resource not found" });
   }
   else {
