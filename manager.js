@@ -53,7 +53,7 @@ module.exports.vehicleGetAll = function() {
         Vehicles.find()
           //.limit(10)
           .lean()
-          .sort({id: 'asc', make: 'asc', model: 'asc', year: 'asc' })
+          .sort({_id: 'asc', make: 'asc', model: 'asc', year: 'asc' })
           .exec(function (error, items) {
             if (error) {
               // Query error
@@ -99,7 +99,7 @@ module.exports.vehicleGetById = function (byId) {
     console.log("Getting Vehicle By ID...");
     return new Promise(function (resolve, reject) {
         // Find one specific document
-        Vehicles.findOne({"id": byId}, function(error, data) {
+        Vehicles.findOne({"_id": byId}, function(error, data) {
             if (error) {
                 // Find/match is not found
                 return reject(error.message);
@@ -165,11 +165,13 @@ module.exports.vehicleEdit = function (newItem) {
  ******************************************************************************/
 module.exports.vehicleDelete = function (itemId) {
     console.log("Deleting Vehicle By ID...");
+    console.log(itemId);
     return new Promise(function (resolve, reject) {
         // Find one specific document
-        Vehicles.findByIdAndRemove(itemId, function (error) {
+        Vehicles.deleteOne({"_id": itemId}, function (error) {
             if (error) {
               // Cannot delete item
+              console.log(error.message);
               return reject(error.message);
             }
             // Return success, but don't leak info
