@@ -127,12 +127,12 @@ app.post("/api/vehicle", function (req, res) {
 app.put("/api/vehicles/:id", function (req, res) {
   // Make sure that the URL parameter matches the body value
   // This code is customized for the expected shape of the body object
-  if (req.params.id != req.body.id) {
+  if (req.params.id != req.params.id) {
     res.status(404).json({ "message": "Resource not found" });
   }
   else {
     // Call the manager method
-    manager.vehicleEdit(req.body)
+    manager.vehicleEdit(req.params.id)
     .then(function(data) {
       res.json(data);
     })
@@ -145,7 +145,7 @@ app.put("/api/vehicles/:id", function (req, res) {
 // Delete item
 app.delete("/api/vehicles/:id", function (req, res) {
   // Call the manager method
-  manager.vehicleDelete(req.body)
+  manager.vehicleDelete(req.params.id)
          .then(function(data) {
            res.json(data);
          })
