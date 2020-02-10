@@ -32,6 +32,15 @@ app.use(cors());
 
 const manager = require("./manager.js");
 
+
+
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+app.use(bodyParser.json());
+
+
 // ################################################################################
 // Deliver the app's home page to browser clients
 
@@ -103,7 +112,7 @@ app.get("/api/vehicles/:id", function (req, res) {
 });
 
 // Add new
-app.post("/api/vehicle/add", function (req, res) {
+app.post("/api/vehicle", function (req, res) {
   // Call the manager method
   manager.vehicleAdd(req.body)
          .then(function(data) {

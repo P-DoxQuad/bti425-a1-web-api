@@ -5,6 +5,7 @@
  ******************************************************************************/ 
 
 const mongoose = require("mongoose");                                                               // Linking Mongoose module.
+autoIncrement = require('mongoose-auto-increment');
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
@@ -28,11 +29,13 @@ let Vehicles;                                                                   
 module.exports.initialize = function() {
     return new Promise(function(resolve, reject) {
         let db = mongoose.createConnection("mongodb://dbuser:1234@cluster1-shard-00-00-hc4tf.gcp.mongodb.net:27017,cluster1-shard-00-01-hc4tf.gcp.mongodb.net:27017,cluster1-shard-00-02-hc4tf.gcp.mongodb.net:27017/db-a1?ssl=true&replicaSet=cluster1-shard-0&authSource=admin&retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true });
+        autoIncrement.initialize(db);
 
         db.on('error', function (err) {
             reject(console.log(err.message));                                                                            // If connection error, Reject the promise with the provided error.
         });
         db.once('open', function () {
+            vehicleSchema.plugin(autoIncrement.plugin, 'vehicles');
             Vehicles = db.model("db-a1", vehicleSchema, "vehicles");                                                   // Create a user model from schema above.
             
             resolve(console.log("Database Connected"));
@@ -48,7 +51,7 @@ module.exports.vehicleGetAll = function() {
     console.log("Getting All Vehicles...");
     return new Promise(function(resolve, reject) {
         Vehicles.find()
-          //.limit(20)
+          //.limit(10)
           .lean()
           .sort({id: 'asc', make: 'asc', model: 'asc', year: 'asc' })
           .exec(function (error, items) {
@@ -104,6 +107,7 @@ module.exports.vehicleGetById = function (byId) {
             // Check for an item
             if (data) {
                 // Found, one object will be returned
+                console.log(data);
                 return resolve(data);
             } else {
                 return reject('Not found');
@@ -117,6 +121,7 @@ module.exports.vehicleGetById = function (byId) {
  ******************************************************************************/
 module.exports.vehicleAdd = function (newItem) {
     console.log("Adding Vehicle to Collection...");
+    console.log(newItem);
     return new Promise(function (resolve, reject) {
         // Find one specific document
         Vehicles.create(newItem, function (error, item) {
