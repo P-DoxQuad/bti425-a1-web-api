@@ -113,6 +113,9 @@ app.get("/api/vehicles/:id", function (req, res) {
 
 // Add new
 app.post("/api/vehicle", function (req, res) {
+  
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader("Access-Control-Allow-Headers", "Authorization, Cache-Control, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
   // Call the manager method
   manager.vehicleAdd(req.body)
          .then(function(data) {
