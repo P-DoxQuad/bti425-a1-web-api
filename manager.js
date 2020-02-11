@@ -139,11 +139,28 @@ module.exports.vehicleAdd = function (newItem) {
 /******************************************************************************
  * Edit existing vehicle from the Database                                    *
  ******************************************************************************/
-module.exports.vehicleEdit = function (newItem) {
+module.exports.vehicleEdit = function (changes) {
     console.log("Editing Vehicle in Collection...");
+    console.log("Changes: " + changes);
+
     return new Promise(function (resolve, reject) {
         // Find one specific document
-        Vehicles.findByIdAndUpdate(newItem._id, newItem, { new: true }, function (error, item) {
+        Vehicles.findByIdAndUpdate(changes.id, 
+            {
+                id: changes.id,
+                make: changes.make,
+                model: changes.model,
+                colour: changes.colour,
+                year: changes.year,
+                vin: changes.vin,
+                msrp: changes.msrp,
+                photo: changes.photo,
+                description: changes.description,
+                purchaseDate: changes.purchaseDate,
+                purchaserName: changes.purchaserName,
+                purchaserEmail: changes.purchaserEmail,
+                pricePaid: changes.pricePaid
+            }, function (error, item) {
             if (error) {
               // Cannot edit item
               return reject(console.log(error.message));
