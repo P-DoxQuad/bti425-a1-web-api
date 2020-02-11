@@ -130,14 +130,16 @@ app.post("/api/vehicle", function (req, res) {
 
 // Edit existing
 app.put("/api/vehicles/:id", function (req, res) {
+
+  console.log("By ID: " + req.body.id);
   // Make sure that the URL parameter matches the body value
   // This code is customized for the expected shape of the body object
-  if (req.params.id != req.params.id) {
+  if (req.body.id != req.body.id) {
     res.status(404).json({ "message": "Resource not found" });
   }
   else {
     // Call the manager method
-    manager.vehicleEdit(req.params.id)
+    manager.vehicleEdit(req.body)
     .then(function(data) {
       res.json(data);
     })
