@@ -4,18 +4,14 @@
  * middleware interface between NodeJS and MongoDB.                           *
  ******************************************************************************/ 
 
-const mongoose = require("mongoose");                                                               // Linking Mongoose module.
-autoIncrement = require('mongoose-auto-increment');
+const mongoose = require("mongoose");                                                 // Linking Mongoose module.
+autoIncrement = require('mongoose-auto-increment');                                   // Auto-Increment ID
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 
 
-
-
-
-
-const vehicleSchema = require("./vehicle-schema.js");         // Load Schema                                                              // Assigning Mongoose Schema to variable.
+const vehicleSchema = require("./vehicle-schema.js");                                // Assigning Mongoose Schema to variable.
 
 //var vehicleManager = mongoose.model("db-a1", vehicleSchema);
 
@@ -32,11 +28,11 @@ module.exports.initialize = function() {
         autoIncrement.initialize(db);
 
         db.on('error', function (err) {
-            reject(console.log(err.message));                                                                            // If connection error, Reject the promise with the provided error.
+            reject(console.log(err.message));                                           // If connection error, Reject the promise with the provided error.
         });
         db.once('open', function () {
             vehicleSchema.plugin(autoIncrement.plugin, 'vehicles');
-            Vehicles = db.model("db-a1", vehicleSchema, "vehicles");                                                   // Create a user model from schema above.
+            Vehicles = db.model("db-a1", vehicleSchema, "vehicles");                    // Create a vehicle model from schema above.
             
             resolve(console.log("Database Connected"));
         });
