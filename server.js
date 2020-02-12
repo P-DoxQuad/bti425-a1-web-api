@@ -6,7 +6,7 @@
  * 
  * Name: Michael Dzura Student ID: 033566100 Date: 02/11/2020
  * 
- * Online (Heroku) URL: https://bti425-a1-web-app.herokuapp.com/
+ * Online (Heroku) URL: https://bti425-a1-web-api.herokuapp.com
  * ********************************************************************************/
 
 
