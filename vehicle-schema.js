@@ -15,7 +15,7 @@ var vehicleSchema = new Schema({
   msrp: Number,
   photo: String,
   description: String,
-  purchaseDate: Date,
+  purchaseDate: String,
   purchaserName: String,
   purchaserEmail: String,
   pricePaid: Number
